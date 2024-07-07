@@ -1,4 +1,3 @@
-import { randomBytes } from "crypto";
 import User from "../models/UserModel.js";
 import { resolveMxRecords } from "../utils/email/resolveMxRecords.js";
 import { testInbox } from "../utils/email/testInbox.js";
