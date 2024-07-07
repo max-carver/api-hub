@@ -5,7 +5,8 @@
 	"scripts": {
 		"client": "npm run dev --prefix client",
 		"server": "npm run server --prefix server",
-		"dev": "concurrently \"npm run server\" \"npm run client\" "
+		"dev": "concurrently \"npm run server\" \"npm run client\" ",
+		"production": "concurrently \"npm run server\" \"npm run build\" "
 	},
 	"keywords": [],
 	"author": "Max Evans",
