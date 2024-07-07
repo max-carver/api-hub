@@ -6,6 +6,11 @@ import cors from "cors";
 import apiRoutes from "./routes/apiRoutes.js";
 import dotenv from "dotenv";
 dotenv.config();
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
