@@ -17,7 +17,7 @@ app.use(express.json());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("./APIDocumentation"));
+app.use(express.static(path.join(__dirname, "../client/dist")));
 app.use(cookieParser());
 app.use(
 	cors({
@@ -28,6 +28,10 @@ app.use(
 // Routes
 app.use("/", userRoutes);
 app.use("/api", apiRoutes);
+
+app.get("*", (req, res) => {
+	res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+});
 
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
