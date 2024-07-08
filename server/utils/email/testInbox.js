@@ -1,35 +1,35 @@
 import net from "net";
-import { resolveMxRecords } from "./resolveMxRecords";
+import { resolveDns } from "./resolveDns.js";
 
 export const testInbox = async (smtpHostname, emailInbox) => {
-	return new Promise((resolve, reject) => {
+	return new Promise(async (resolve, reject) => {
 		const result = {
 			connectionSucceeded: false,
 			inboxExists: false,
 		};
 
-		console.log(`Attempting to connect to SMTP server: ${smtpHostname}`);
-		
+		// Resolve IP address first to avoid DNS lookup issues
 		let ip;
 		try {
-				ip = await resolveDns(smtpHostname);
+			ip = await resolveDns(smtpHostname);
 		} catch (err) {
-				console.error(`DNS resolution failed for ${smtpHostname}:`, err);
-				resolve({ ...result, error: "DNS resolution failed" });
-				return;
+			console.error(`DNS resolution failed for ${smtpHostname}:`, err);
+			resolve({ ...result, error: "DNS resolution failed" });
+			return;
 		}
-		
+
 		const socket = net.createConnection({
-			port: 587,
+			port: 465,
 			host: ip,
 			family: 4,
 		});
+
 		let currentStageName = "CHECK_CONNECTION_ESTABLISHED";
 
 		const timeout = setTimeout(() => {
 			socket.destroy();
 			resolve({ ...result, error: "Operation timed out" });
-		}, 60000);
+		}, 120000); // Increased timeout to 120 seconds
 
 		socket.on("connect", () => {
 			console.log("Connected to:", smtpHostname);

@@ -3,10 +3,17 @@ import { resolveMxRecords } from "../utils/email/resolveMxRecords.js";
 import { testInbox } from "../utils/email/testInbox.js";
 import { verifyEmailFormat } from "../utils/email/verifyEmailFormat.js";
 
+const apiKeyCache = new Map();
+const mxRecordCache = new Map();
+
 const checkApiKey = async (apiKey) => {
+	if (apiKeyCache.has(apiKey)) return apiKeyCache.get(apiKey);
+
 	try {
 		const user = await User.findOne({ apiKey });
-		return user !== null;
+		const isValid = user !== null;
+		apiKeyCache.set(apiKey, isValid);
+		return isValid;
 	} catch (err) {
 		console.error("Error checking API Key", err);
 		return false;
@@ -14,6 +21,9 @@ const checkApiKey = async (apiKey) => {
 };
 
 const validateEmailController = async (req, res) => {
+	const startTime = Date.now();
+	const TIMEOUT = 30000; // 30 seconds timeout
+
 	try {
 		const { email } = req.body;
 		const apiKey = req.headers.apikey;
@@ -37,41 +47,40 @@ const validateEmailController = async (req, res) => {
 
 		const [, domain] = email.split("@");
 
-		const mxRecords = await resolveMxRecords(domain);
+		let mxRecords;
+		if (mxRecordCache.has(domain)) {
+			mxRecords = mxRecordCache.get(domain);
+		} else {
+			mxRecords = await resolveMxRecords(domain);
+			if (mxRecords && mxRecords.length > 0) {
+				mxRecordCache.set(domain, mxRecords);
+			}
+		}
+
 		if (!mxRecords || mxRecords.length === 0) {
 			return res.status(400).json({ error: "No MX records found for domain" });
 		}
 
 		const sortedMxRecords = mxRecords.sort((a, b) => a.priority - b.priority);
 
-		let smtpResult = { connectionSucceeded: false, inboxExists: false };
-		let hostIndex = 0;
-		let maxAttempts = 5;
-		let attempt = 0;
+		const testResults = await Promise.allSettled(
+			sortedMxRecords
+				.slice(0, 3)
+				.map((record) => testInbox(record.exchange, email))
+		);
 
-		while (hostIndex < sortedMxRecords.length && attempt < maxAttempts) {
-			try {
-				smtpResult = await testInbox(
-					sortedMxRecords[hostIndex].exchange,
-					email
-				);
+		const successfulResult = testResults.find(
+			(result) =>
+				result.status === "fulfilled" && result.value.connectionSucceeded
+		);
 
-				if (smtpResult.error) {
-					console.error(`Attempt ${attempt + 1} failed:`, smtpResult.error);
-					hostIndex++;
-					attempt++;
-				} else if (smtpResult.connectionSucceeded) {
-					break;
-				}
-			} catch (err) {
-				console.error(`Attempt ${attempt + 1} failed:`, err);
-				hostIndex++;
-				attempt++;
-			}
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+		const smtpResult = successfulResult
+			? successfulResult.value
+			: { connectionSucceeded: false, inboxExists: false };
+
+		if (Date.now() - startTime > TIMEOUT) {
+			throw new Error("Request timed out");
 		}
-
-		let valid = smtpResult.inboxExists ? true : false;
 
 		return res.json({
 			email,
@@ -79,8 +88,8 @@ const validateEmailController = async (req, res) => {
 			mxRecordsFound: true,
 			smtpConnectionSucceeded: smtpResult.connectionSucceeded,
 			inboxExists: smtpResult.inboxExists,
-			isValid: valid,
-			Error: smtpResult.error || null,
+			isValid: smtpResult.inboxExists,
+			error: smtpResult.error || null,
 		});
 	} catch (error) {
 		console.error("Validation failed:", error);
