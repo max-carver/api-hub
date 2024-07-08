@@ -1,10 +1,14 @@
 import { promises } from "dns";
+import { promisify } from "util";
 
-export const resolveMxRecords = async (domain) => {
+const dnsResolve = promisify(dns.resolve);
+
+export const resolveMxRecords = async (hostname) => {
 	try {
-		return await promises.resolveMx(domain);
+		const addresses = await dnsResolve(hostname);
+		return addresses[0];
 	} catch (err) {
 		console.error(err);
-		return [];
+		throw new Error(`DNS resolution failed for ${hostname}: ${err.message}`);
 	}
 };

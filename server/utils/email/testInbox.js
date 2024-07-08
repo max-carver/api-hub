@@ -1,4 +1,5 @@
 import net from "net";
+import { resolveMxRecords } from "./resolveMxRecords";
 
 export const testInbox = async (smtpHostname, emailInbox) => {
 	return new Promise((resolve, reject) => {
@@ -7,9 +8,20 @@ export const testInbox = async (smtpHostname, emailInbox) => {
 			inboxExists: false,
 		};
 
+		console.log(`Attempting to connect to SMTP server: ${smtpHostname}`);
+		
+		let ip;
+		try {
+				ip = await resolveDns(smtpHostname);
+		} catch (err) {
+				console.error(`DNS resolution failed for ${smtpHostname}:`, err);
+				resolve({ ...result, error: "DNS resolution failed" });
+				return;
+		}
+		
 		const socket = net.createConnection({
 			port: 587,
-			host: smtpHostname,
+			host: ip,
 			family: 4,
 		});
 		let currentStageName = "CHECK_CONNECTION_ESTABLISHED";

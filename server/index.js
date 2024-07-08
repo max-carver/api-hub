@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, "../client/dist")));
 app.use(cookieParser());
 app.use(
 	cors({
-		origin: "https://pex-api-hub.onrender.com",
+		origin: "http://localhost:5173",
 		credentials: true,
 	})
 );
@@ -35,7 +35,7 @@ app.use("/api", userRoutes);
 app.use("/api", apiRoutes);
 
 app.get("*", (req, res) => {
-	res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+	res.sendFile(path.join(__dirname, "../client/dist"));
 });
 
 app.listen(PORT, () => {
