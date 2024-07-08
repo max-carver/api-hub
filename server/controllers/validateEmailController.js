@@ -16,7 +16,7 @@ const checkApiKey = async (apiKey) => {
 const validateEmailController = async (req, res) => {
 	try {
 		const { email } = req.body;
-		const apiKey = req.header("Authorization");
+		const apiKey = req.headers.apikey;
 
 		if (!apiKey) {
 			return res.status(401).json({ error: "API key is required" });
