@@ -63,6 +63,7 @@ export const testInbox = async (smtpHostname, emailInbox) => {
 			console.error("Socket error:", err);
 			clearTimeout(timeout);
 			resolve({ ...result, error: err.message });
+			return;
 		});
 
 		socket.on("close", () => {
