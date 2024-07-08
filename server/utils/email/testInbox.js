@@ -7,13 +7,17 @@ export const testInbox = async (smtpHostname, emailInbox) => {
 			inboxExists: false,
 		};
 
-		const socket = net.createConnection({ port: 465, host: smtpHostname });
+		const socket = net.createConnection({
+			port: 587,
+			host: smtpHostname,
+			family: 4,
+		});
 		let currentStageName = "CHECK_CONNECTION_ESTABLISHED";
 
 		const timeout = setTimeout(() => {
 			socket.destroy();
 			resolve({ ...result, error: "Operation timed out" });
-		}, 30000);
+		}, 60000);
 
 		socket.on("connect", () => {
 			console.log("Connected to:", smtpHostname);
