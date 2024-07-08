@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useValidateEmailMutation } from "../slices/usersApiSlice.js";
+import { useValidateEmailMutation } from "../slices/emailValidationApiSlice.js";
 import { toast } from "react-toastify";
 import { BigLoader } from "../components/Loader.jsx";
 
@@ -27,9 +27,7 @@ const EmailValidatorPage = () => {
 				email,
 				apiKey: userInfo.apiKey,
 			}).unwrap();
-			console.log(userInfo.apiKey);
 			setData(res);
-			console.log({ ...res });
 			toast.success("Validated email");
 		} catch (error) {
 			console.error(error);

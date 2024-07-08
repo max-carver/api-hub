@@ -4,7 +4,7 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 	endpoints: (builder) => ({
 		login: builder.mutation({
 			query: (data) => ({
-				url: "/apilogin",
+				url: "/api/login",
 				method: "POST",
 				credentials: "include",
 				body: data,
@@ -33,15 +33,6 @@ export const usersApiSlice = apiSlice.injectEndpoints({
 				body: data,
 			}),
 		}),
-		validateEmail: builder.mutation({
-			query: ({ email, apiKey }) => ({
-				url: "/api/validateEmail",
-				method: "POST",
-				credentials: "include",
-				headers: { Authorization: apiKey },
-				body: { email },
-			}),
-		}),
 	}),
 });
 
@@ -50,5 +41,4 @@ export const {
 	useLogoutMutation,
 	useRegisterMutation,
 	useUpdateUserMutation,
-	useValidateEmailMutation,
 } = usersApiSlice;
