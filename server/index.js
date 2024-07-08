@@ -31,7 +31,7 @@ app.use(
 	})
 );
 // Routes
-app.use("/", userRoutes);
+app.use("/api", userRoutes);
 app.use("/api", apiRoutes);
 
 app.get("*", (req, res) => {
