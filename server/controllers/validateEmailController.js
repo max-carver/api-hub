@@ -3,17 +3,10 @@ import { resolveMxRecords } from "../utils/email/resolveMxRecords.js";
 import { testInbox } from "../utils/email/testInbox.js";
 import { verifyEmailFormat } from "../utils/email/verifyEmailFormat.js";
 
-const apiKeyCache = new Map();
-const mxRecordCache = new Map();
-
 const checkApiKey = async (apiKey) => {
-	if (apiKeyCache.has(apiKey)) return apiKeyCache.get(apiKey);
-
 	try {
 		const user = await User.findOne({ apiKey });
-		const isValid = user !== null;
-		apiKeyCache.set(apiKey, isValid);
-		return isValid;
+		return user !== null;
 	} catch (err) {
 		console.error("Error checking API Key", err);
 		return false;
@@ -21,9 +14,6 @@ const checkApiKey = async (apiKey) => {
 };
 
 const validateEmailController = async (req, res) => {
-	const startTime = Date.now();
-	const TIMEOUT = 30000; // 30 seconds timeout
-
 	try {
 		const { email } = req.body;
 		const apiKey = req.headers.apikey;
@@ -45,55 +35,51 @@ const validateEmailController = async (req, res) => {
 			return res.status(400).json({ error: "Email format is invalid" });
 		}
 
-		// const [, domain] = email.split("@");
+		const [, domain] = email.split("@");
 
-		// let mxRecords;
-		// if (mxRecordCache.has(domain)) {
-		// 	mxRecords = mxRecordCache.get(domain);
-		// } else {
-		// 	mxRecords = await resolveMxRecords(domain);
-		// 	if (mxRecords && mxRecords.length > 0) {
-		// 		mxRecordCache.set(domain, mxRecords);
-		// 	}
-		// }
-
-		// if (!mxRecords || mxRecords.length === 0) {
-		// 	return res.status(400).json({ error: "No MX records found for domain" });
-		// }
-
-		// const sortedMxRecords = mxRecords.sort((a, b) => a.priority - b.priority);
-
-		// const testResults = await Promise.allSettled(
-		// 	sortedMxRecords
-		// 		.slice(0, 3)
-		// 		.map((record) => testInbox(record.exchange, email))
-		// );
-
-		// const successfulResult = testResults.find(
-		// 	(result) =>
-		// 		result.status === "fulfilled" && result.value.connectionSucceeded
-		// );
-
-		// const smtpResult = successfulResult
-		// 	? successfulResult.value
-		// 	: { connectionSucceeded: false, inboxExists: false };
-
-		// if (Date.now() - startTime > TIMEOUT) {
-		// 	throw new Error("Request timed out");
-		// }
-
-		// return res.json({
-		// 	email,
-		// 	emailFormatValid: emailFormatIsValid,
-		// 	mxRecordsFound: true,
-		// 	smtpConnectionSucceeded: smtpResult.connectionSucceeded,
-		// 	inboxExists: smtpResult.inboxExists,
-		// 	isValid: smtpResult.inboxExists,
-		// 	error: smtpResult.error || null,
-		// });
-		if (verifyEmailFormat()) {
-			res.status(200).json({ success: "Email is valid" });
+		const mxRecords = await resolveMxRecords(domain);
+		if (!mxRecords || mxRecords.length === 0) {
+			return res.status(400).json({ error: "No MX records found for domain" });
 		}
+
+		const sortedMxRecords = mxRecords.sort((a, b) => a.priority - b.priority);
+
+		let smtpResult = { connectionSucceeded: false, inboxExists: false };
+		let hostIndex = 0;
+		// let maxAttempts = 5;
+		// let attempt = 0;
+
+		while (hostIndex < sortedMxRecords.length) {
+			try {
+				smtpResult = await testInbox(
+					sortedMxRecords[hostIndex].exchange,
+					email
+				);
+
+				if (smtpResult.error) {
+					console.error(smtpResult.error);
+					hostIndex++;
+				} else if (smtpResult.connectionSucceeded) {
+					break;
+				}
+			} catch (err) {
+				console.error(err);
+				hostIndex++;
+			}
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+		}
+
+		let valid = smtpResult.inboxExists ? true : false;
+
+		return res.json({
+			email,
+			emailFormatValid: emailFormatIsValid,
+			mxRecordsFound: true,
+			smtpConnectionSucceeded: smtpResult.connectionSucceeded,
+			inboxExists: smtpResult.inboxExists,
+			isValid: valid,
+			Error: smtpResult.error || null,
+		});
 	} catch (error) {
 		console.error("Validation failed:", error);
 		return res

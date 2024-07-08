@@ -1,35 +1,23 @@
 import net from "net";
-import { resolveDns } from "./resolveDns.js";
 
 export const testInbox = async (smtpHostname, emailInbox) => {
-	return new Promise(async (resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		const result = {
 			connectionSucceeded: false,
 			inboxExists: false,
 		};
 
-		// Resolve IP address first to avoid DNS lookup issues
-		let ip;
-		try {
-			ip = await resolveDns(smtpHostname);
-		} catch (err) {
-			console.error(`DNS resolution failed for ${smtpHostname}:`, err);
-			resolve({ ...result, error: "DNS resolution failed" });
-			return;
-		}
-
 		const socket = net.createConnection({
-			port: 465,
-			host: ip,
+			port: 25,
+			host: smtpHostname,
 			family: 4,
 		});
-
 		let currentStageName = "CHECK_CONNECTION_ESTABLISHED";
 
 		const timeout = setTimeout(() => {
 			socket.destroy();
 			resolve({ ...result, error: "Operation timed out" });
-		}, 120000); // Increased timeout to 120 seconds
+		}, 60000);
 
 		socket.on("connect", () => {
 			console.log("Connected to:", smtpHostname);
@@ -49,6 +37,24 @@ export const testInbox = async (smtpHostname, emailInbox) => {
 					break;
 				}
 				case "SEND_EHLO": {
+					const command = `MAIL FROM:<name@example.org>\r\n`;
+					socket.write(command);
+					currentStageName = "SEND_MAIL_FROM";
+					break;
+				}
+				case "STARTTLS": {
+					// Upgrade to TLS
+					const tlsSocket = tls.connect({
+						socket: socket,
+						host: smtpHostname,
+					});
+					socket = tlsSocket;
+					const command = `EHLO mail.example.org\r\n`;
+					socket.write(command);
+					currentStageName = "SEND_EHLO_AFTER_STARTTLS";
+					break;
+				}
+				case "SEND_EHLO_AFTER_STARTTLS": {
 					const command = `MAIL FROM:<name@example.org>\r\n`;
 					socket.write(command);
 					currentStageName = "SEND_MAIL_FROM";
