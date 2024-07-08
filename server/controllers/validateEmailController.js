@@ -45,52 +45,55 @@ const validateEmailController = async (req, res) => {
 			return res.status(400).json({ error: "Email format is invalid" });
 		}
 
-		const [, domain] = email.split("@");
+		// const [, domain] = email.split("@");
 
-		let mxRecords;
-		if (mxRecordCache.has(domain)) {
-			mxRecords = mxRecordCache.get(domain);
-		} else {
-			mxRecords = await resolveMxRecords(domain);
-			if (mxRecords && mxRecords.length > 0) {
-				mxRecordCache.set(domain, mxRecords);
-			}
+		// let mxRecords;
+		// if (mxRecordCache.has(domain)) {
+		// 	mxRecords = mxRecordCache.get(domain);
+		// } else {
+		// 	mxRecords = await resolveMxRecords(domain);
+		// 	if (mxRecords && mxRecords.length > 0) {
+		// 		mxRecordCache.set(domain, mxRecords);
+		// 	}
+		// }
+
+		// if (!mxRecords || mxRecords.length === 0) {
+		// 	return res.status(400).json({ error: "No MX records found for domain" });
+		// }
+
+		// const sortedMxRecords = mxRecords.sort((a, b) => a.priority - b.priority);
+
+		// const testResults = await Promise.allSettled(
+		// 	sortedMxRecords
+		// 		.slice(0, 3)
+		// 		.map((record) => testInbox(record.exchange, email))
+		// );
+
+		// const successfulResult = testResults.find(
+		// 	(result) =>
+		// 		result.status === "fulfilled" && result.value.connectionSucceeded
+		// );
+
+		// const smtpResult = successfulResult
+		// 	? successfulResult.value
+		// 	: { connectionSucceeded: false, inboxExists: false };
+
+		// if (Date.now() - startTime > TIMEOUT) {
+		// 	throw new Error("Request timed out");
+		// }
+
+		// return res.json({
+		// 	email,
+		// 	emailFormatValid: emailFormatIsValid,
+		// 	mxRecordsFound: true,
+		// 	smtpConnectionSucceeded: smtpResult.connectionSucceeded,
+		// 	inboxExists: smtpResult.inboxExists,
+		// 	isValid: smtpResult.inboxExists,
+		// 	error: smtpResult.error || null,
+		// });
+		if (verifyEmailFormat()) {
+			res.status(200).json({ success: "Email is valid" });
 		}
-
-		if (!mxRecords || mxRecords.length === 0) {
-			return res.status(400).json({ error: "No MX records found for domain" });
-		}
-
-		const sortedMxRecords = mxRecords.sort((a, b) => a.priority - b.priority);
-
-		const testResults = await Promise.allSettled(
-			sortedMxRecords
-				.slice(0, 3)
-				.map((record) => testInbox(record.exchange, email))
-		);
-
-		const successfulResult = testResults.find(
-			(result) =>
-				result.status === "fulfilled" && result.value.connectionSucceeded
-		);
-
-		const smtpResult = successfulResult
-			? successfulResult.value
-			: { connectionSucceeded: false, inboxExists: false };
-
-		if (Date.now() - startTime > TIMEOUT) {
-			throw new Error("Request timed out");
-		}
-
-		return res.json({
-			email,
-			emailFormatValid: emailFormatIsValid,
-			mxRecordsFound: true,
-			smtpConnectionSucceeded: smtpResult.connectionSucceeded,
-			inboxExists: smtpResult.inboxExists,
-			isValid: smtpResult.inboxExists,
-			error: smtpResult.error || null,
-		});
 	} catch (error) {
 		console.error("Validation failed:", error);
 		return res
