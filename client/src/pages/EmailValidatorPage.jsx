@@ -27,6 +27,7 @@ const EmailValidatorPage = () => {
 				email,
 				apiKey: userInfo.apiKey,
 			}).unwrap();
+			console.log(res);
 			setData(res);
 			toast.success("Validated email");
 		} catch (error) {
