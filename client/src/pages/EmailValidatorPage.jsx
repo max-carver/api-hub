@@ -27,7 +27,6 @@ const EmailValidatorPage = () => {
 				email,
 				apiKey: userInfo.apiKey,
 			}).unwrap();
-			console.log(res);
 			setData(res);
 			toast.success("Validated email");
 		} catch (error) {
@@ -80,70 +79,51 @@ const EmailValidatorPage = () => {
 			<div className="flex items-center justify-center mt-5">
 				{isLoading && <BigLoader />}
 				{data && (
-					<div className="grid grid-cols-2 text-center w-1/2 border">
-						{/* Email format */}
-						<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
-							Email format
-						</p>
-						<p
-							className={clsx("py-2 border-b", {
-								"text-green-500": data.regex,
-								"text-red-500": !data.regex,
-							})}
-						>
-							{data.regex ? "Valid" : "Invalid"}
-						</p>
+					<div className="flex felx-col items-center">
+						<div className="grid grid-cols-2 text-center w-1/2 border">
+							{/* Email format */}
+							<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
+								Email format
+							</p>
+							<p
+								className={clsx("py-2 border-b", {
+									"text-green-500": data.regex,
+									"text-red-500": !data.regex,
+								})}
+							>
+								{data.regex ? "Valid" : "Invalid"}
+							</p>
 
-						{/* Is disposable */}
-						<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
-							Email disposable
-						</p>
-						<p
-							className={clsx("py-2 border-b", {
-								"text-green-500": data.disposable,
-								"text-red-500": !data.disposable,
-							})}
-						>
-							{data.disposable ? "False" : "True"}
-						</p>
+							{/* Is disposable */}
+							<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
+								Email disposable
+							</p>
+							<p
+								className={clsx("py-2 border-b", {
+									"text-green-500": data.disposable,
+									"text-red-500": !data.disposable,
+								})}
+							>
+								{data.disposable ? "False" : "True"}
+							</p>
 
-						{/* Mx Records*/}
-						<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
-							MX records found
-						</p>
-						<p
-							className={clsx("p-2 border-b", {
-								"text-green-500": data.mx,
-								"text-red-500": !data.mx,
-							})}
-						>
-							{data.mx ? "True" : "False"}
-						</p>
+							{/* Mx Records*/}
+							<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
+								MX records found
+							</p>
+							<p
+								className={clsx("p-2 border-b", {
+									"text-green-500": data.mx,
+									"text-red-500": !data.mx,
+								})}
+							>
+								{data.mx ? "True" : "False"}
+							</p>
+						</div>
 
-						{/* SMTP Connection */}
-						<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
-							SMTP connection
-						</p>
-						<p
-							className={clsx("p-2 border-b", {
-								"text-green-500": data.smtp,
-								"text-red-500": !data.smtp,
-							})}
-						>
-							{data.smtp ? "True" : "False"}
-						</p>
-
-						{/* Existing inbox*/}
-						<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
-							Existing inbox
-						</p>
-						<p
-							className={clsx("p-2 border-b", {
-								"text-green-500": data.smtp,
-								"text-red-500": !data.smtp,
-							})}
-						>
-							{data.smtp ? "True" : "False"}
+						<p className="text-sm text-zinc-600">
+							This check does not ensure an SMTP connection or that the email
+							provided has a mailbox due to security reasons
 						</p>
 					</div>
 				)}

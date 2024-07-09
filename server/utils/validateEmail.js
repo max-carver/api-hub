@@ -9,7 +9,11 @@ export const validateEmail = async (email) => {
 			results[validator] = res.validators[validator].valid;
 		}
 
-		return results;
+		return {
+			regex: results.regex,
+			disposable: results.disposable,
+			mx: results.mx,
+		};
 	} catch (error) {
 		console.error("Email validation error:", error);
 		throw error;
