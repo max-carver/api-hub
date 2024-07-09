@@ -16,7 +16,8 @@
 	"license": "MIT",
 	"description": "A respository for Project Exodus REST APIs to use technological company solutions.",
 	"devDependencies": {
-		"concurrently": "^8.2.2"
+		"concurrently": "^8.2.2",
+		"deep-email-validator": "^0.1.21"
 	},
 	"dependencies": {
 		"dotenv": "^16.4.5",
