@@ -1,6 +1,14 @@
-import { validate } from "deep-email-validator";
+import EmailValidator from "email-deep-validator";
+
+const emailValidator = new EmailValidator();
 
 export const validEmail = async (email) => {
-	const response = await validate(email);
-	return response;
+	const { wellFormed, validDomain, validMailbox } = await emailValidator.verify(
+		email
+	);
+	return {
+		wellFormed,
+		validDomain,
+		validMailbox,
+	};
 };
