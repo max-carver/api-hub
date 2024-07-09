@@ -3,12 +3,13 @@ import { useSelector } from "react-redux";
 import { useValidateEmailMutation } from "../slices/emailValidationApiSlice.js";
 import { toast } from "react-toastify";
 import { BigLoader } from "../components/Loader.jsx";
-
+import clsx from "clsx";
 const EmailValidatorPage = () => {
 	const [email, setEmail] = useState("");
 	const [error, setError] = useState("");
 	const [data, setData] = useState(null);
 
+	// Redux
 	const { userInfo } = useSelector((state) => state.auth);
 
 	const [validateEmail, { isLoading }] = useValidateEmailMutation();
@@ -26,6 +27,7 @@ const EmailValidatorPage = () => {
 				email,
 				apiKey: userInfo.apiKey,
 			}).unwrap();
+			console.log(res);
 			setData(res);
 			toast.success("Validated email");
 		} catch (error) {
@@ -78,30 +80,70 @@ const EmailValidatorPage = () => {
 			<div className="flex items-center justify-center mt-5">
 				{isLoading && <BigLoader />}
 				{data && (
-					<div className="flex flex-col w-full items-center mx-auto gap-5">
-						<div className="border grid grid-cols-2 w-1/2 rounded-md">
-							{/* Email format */}
-							<p className="p-2 font-medium bg-zinc-50 text-zinc-950 text-center">
-								Email Format
-							</p>
-							<p className="border-b p-2 text-center bg-zinc-850 text-zinc-50">
-								{data.emailFormatValid ? "True" : "False"}
-							</p>
-
-							{/* MX Records */}
-							<p className="p-2 font-medium bg-zinc-50 text-zinc-950 text-center">
-								MX Records Found
-							</p>
-							<p className="border-b  p-2 text-center bg-zinc-850 text-zinc-50">
-								{data.mxRecordsFound ? "True" : "False"}
-							</p>
-						</div>
+					<div className="grid grid-cols-2 text-center w-1/2 border">
+						{/* Email format */}
+						<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
+							Email format
+						</p>
 						<p
-							className={`${
-								data.isValid ? "text-green-500" : "text-red-500"
-							} text-center p-2 flex items-center text-xl font-bold`}
+							className={clsx("py-2 border-b", {
+								"text-green-500": data.regex,
+								"text-red-500": !data.regex,
+							})}
 						>
-							{data.isValid ? "This email is valid" : "This email is invalid"}
+							{data.regex ? "Valid" : "Invalid"}
+						</p>
+
+						{/* Is disposable */}
+						<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
+							Email disposable
+						</p>
+						<p
+							className={clsx("py-2 border-b", {
+								"text-green-500": data.disposable,
+								"text-red-500": !data.disposable,
+							})}
+						>
+							{data.disposable ? "False" : "True"}
+						</p>
+
+						{/* Mx Records*/}
+						<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
+							MX records found
+						</p>
+						<p
+							className={clsx("p-2 border-b", {
+								"text-green-500": data.mx,
+								"text-red-500": !data.mx,
+							})}
+						>
+							{data.mx ? "True" : "False"}
+						</p>
+
+						{/* SMTP Connection */}
+						<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
+							SMTP connection
+						</p>
+						<p
+							className={clsx("p-2 border-b", {
+								"text-green-500": data.smtp,
+								"text-red-500": !data.smtp,
+							})}
+						>
+							{data.smtp ? "True" : "False"}
+						</p>
+
+						{/* Existing inbox*/}
+						<p className="bg-zinc-50 text-zinc-950 font-medium p-2 border-b  ">
+							Existing inbox
+						</p>
+						<p
+							className={clsx("p-2 border-b", {
+								"text-green-500": data.smtp,
+								"text-red-500": !data.smtp,
+							})}
+						>
+							{data.smtp ? "True" : "False"}
 						</p>
 					</div>
 				)}
