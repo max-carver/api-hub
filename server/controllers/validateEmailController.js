@@ -1,5 +1,5 @@
 import User from "../models/UserModel.js";
-import { validateEmail } from "../utils/validateEmail.js";
+import { validEmail } from "../utils/validateEmail.js";
 
 const checkApiKey = async (apiKey) => {
 	try {
@@ -26,10 +26,10 @@ const validateEmailController = async (req, res) => {
 		if (!validApiKey) {
 			return res.status(401).json({ error: "Invalid API Key" });
 		}
-		const response = await validateEmail(email);
-		return res.json({
-			...response,
-		});
+
+		const response = await validEmail(email);
+
+		return res.status(200).json(response);
 	} catch (error) {
 		console.error("Validation failed:", error);
 		return res
