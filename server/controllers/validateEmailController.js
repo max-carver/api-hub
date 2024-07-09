@@ -16,7 +16,7 @@ const validateEmailController = async (req, res) => {
 	try {
 		const { email } = req.body;
 		const apiKey = req.headers.apikey;
-
+		console.log(req.headers);
 		if (!apiKey) {
 			return res.status(401).json({ error: "API key is required" });
 		}
@@ -37,14 +37,18 @@ const validateEmailController = async (req, res) => {
 		const [, domain] = email.split("@");
 
 		const mxRecords = await resolveMxRecords(domain);
+		let mxRecordsFound;
 		if (!mxRecords || mxRecords.length === 0) {
-			return res.status(400).json({ error: "No MX records found for domain" });
+			mxRecordsFound = false;
+		} else {
+			mxRecordsFound = true;
 		}
 
 		return res.json({
 			email,
 			emailFormatValid: emailFormatIsValid,
-			mxRecordsFound: true,
+			mxRecordsFound,
+			isValid: mxRecordsFound && emailFormatIsValid,
 		});
 	} catch (error) {
 		console.error("Validation failed:", error);

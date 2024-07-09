@@ -139,7 +139,7 @@ const SignInForm = () => {
 					className="bg-stone-900 text-stone-50 p-2 rounded-lg hover:bg-stone-950 transition-all duration-300 ease-in-out active:scale-95 mt-4 w-full"
 					disabled={isLoading}
 				>
-					{isLoading ? "Loading..." : "Login"}
+					{isLoading ? "Loading..." : "Register"}
 				</button>
 
 				<p className="text-sm text-stone-500 text-center mt-2">

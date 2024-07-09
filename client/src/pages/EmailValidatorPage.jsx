@@ -18,7 +18,6 @@ const EmailValidatorPage = () => {
 
 		if (!email) {
 			setError("Email missing");
-			toast.error(error);
 			return;
 		}
 
@@ -79,40 +78,28 @@ const EmailValidatorPage = () => {
 			<div className="flex items-center justify-center mt-5">
 				{isLoading && <BigLoader />}
 				{data && (
-					<div className="border grid grid-cols-2 w-1/2 rounded-md">
-						{/* Email format */}
-						<p className="p-2 font-medium bg-zinc-50 text-zinc-950 text-center">
-							Email Format
-						</p>
-						<p className="border-b p-2 text-center bg-zinc-850 text-zinc-50">
-							{data.emailFormatValid ? "True" : "False"}
-						</p>
-						{/* Existing inbox */}
-						<p className="p-2 font-medium bg-zinc-50 text-zinc-950 text-center">
-							Existing inbox
-						</p>
-						<p className="border-b  p-2 text-center bg-zinc-850 text-zinc-50">
-							{data.inboxExists ? "True" : "False"}
-						</p>
-						{/* MX Records */}
-						<p className="p-2 font-medium bg-zinc-50 text-zinc-950 text-center">
-							MX Records Found
-						</p>
-						<p className="border-b  p-2 text-center bg-zinc-850 text-zinc-50">
-							{data.mxRecordsFound ? "True" : "False"}
-						</p>
-						{/* SMTP Connection */}
-						<p className="p-2 font-medium bg-zinc-50 text-zinc-950 text-center">
-							SMTP Connection
-						</p>
-						<p className="border-b  p-2 text-center bg-zinc-850 text-zinc-50">
-							{data.smtpConnectionSucceeded ? "True" : "False"}
-						</p>
-						{/* Valid email */}
+					<div className="flex flex-col w-full items-center mx-auto gap-5">
+						<div className="border grid grid-cols-2 w-1/2 rounded-md">
+							{/* Email format */}
+							<p className="p-2 font-medium bg-zinc-50 text-zinc-950 text-center">
+								Email Format
+							</p>
+							<p className="border-b p-2 text-center bg-zinc-850 text-zinc-50">
+								{data.emailFormatValid ? "True" : "False"}
+							</p>
+
+							{/* MX Records */}
+							<p className="p-2 font-medium bg-zinc-50 text-zinc-950 text-center">
+								MX Records Found
+							</p>
+							<p className="border-b  p-2 text-center bg-zinc-850 text-zinc-50">
+								{data.mxRecordsFound ? "True" : "False"}
+							</p>
+						</div>
 						<p
 							className={`${
 								data.isValid ? "text-green-500" : "text-red-500"
-							} text-center p-2 flex items-center`}
+							} text-center p-2 flex items-center text-xl font-bold`}
 						>
 							{data.isValid ? "This email is valid" : "This email is invalid"}
 						</p>

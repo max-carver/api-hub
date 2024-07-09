@@ -79,6 +79,7 @@ export const logoutUser = async (req, res) => {
 export const getUserProfile = async (req, res) => {
 	try {
 		const user = await User.findById(req.user.id);
+
 		if (user) {
 			res.status(200).json({
 				id: user.id,
